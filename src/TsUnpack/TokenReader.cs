@@ -4,7 +4,7 @@ using System.Text;
 
 namespace KE.MSTS.TsUnpack;
 
-public class TokenReader : IDisposable
+public sealed class TokenReader : IDisposable
 {
     private readonly StreamReader _streamReader;
     private readonly StringBuilder _stringBuilder;
@@ -27,10 +27,10 @@ public class TokenReader : IDisposable
     public string ReadToken()
     {
         _stringBuilder.Clear();
-            
+
         int character;
         bool inQuotes = false;
-        while ((character =  _streamReader.Read()) != -1)
+        while ((character = _streamReader.Read()) != -1)
         {
             if (Char.IsWhiteSpace((char)character) && _stringBuilder.Length == 0) // If char is a whitespace and string builder is still empty then continue.
             {
@@ -45,7 +45,7 @@ public class TokenReader : IDisposable
                 inQuotes = !inQuotes;
             }
 
-            _stringBuilder.Append((char) character);
+            _stringBuilder.Append((char)character);
 
             if (!inQuotes && (character == 0x28 || character == 0x29)) // If reader is not in quotes and char is opening or closing parenthesis then break.
             {
@@ -78,7 +78,7 @@ public class TokenReader : IDisposable
     {
         if (_stringBuilder.Length > 0)
         {
-            return _stringBuilder[_stringBuilder.Length - 1];
+            return _stringBuilder[^1];
         }
         return -1;
     }

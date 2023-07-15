@@ -24,21 +24,21 @@ internal class TsUnpack
             throw new FileNotFoundException("Failed to open package!");
         }
 
-        MemoryStream decompressedMemoryStream = new MemoryStream();
+        var decompressedMemoryStream = new MemoryStream();
 
         // APK file decompression
         using (FileStream apkFileStream = _apkFile.OpenRead())
         {
-            using (GZipStream decompressionStream = new GZipStream(apkFileStream, CompressionMode.Decompress))
+            using (var decompressionStream = new GZipStream(apkFileStream, CompressionMode.Decompress))
             {
                 decompressionStream.CopyTo(decompressedMemoryStream);
             }
         }
 #if DEBUG
         // Auxiliary output
-        using (StreamReader streamReader = new StreamReader(decompressedMemoryStream, Encoding.Unicode))
+        using (var streamReader = new StreamReader(decompressedMemoryStream, Encoding.Unicode))
         {
-            using (StreamWriter streamWriter = new StreamWriter("outchars.txt", false, Encoding.Unicode))
+            using (var streamWriter = new StreamWriter("outchars.txt", false, Encoding.Unicode))
             {
                 int character;
                 while ((character = streamReader.Read()) != -1)
@@ -49,7 +49,7 @@ internal class TsUnpack
         }
 
         // Auxiliary output
-        using (StreamWriter streamWriter = new StreamWriter("outbytes.txt", false, Encoding.Unicode))
+        using (var streamWriter = new StreamWriter("outbytes.txt", false, Encoding.Unicode))
         {
             foreach (byte @byte in decompressedMemoryStream.ToArray())
             {
@@ -89,7 +89,7 @@ internal class TsUnpack
 
         if (activity.Files.Any(f => f.Exists))
         {
-            OverwriteWindow overwriteWindow = new OverwriteWindow();
+            var overwriteWindow = new OverwriteWindow();
             overwriteWindow.DataContext = activity;
             if (overwriteWindow.ShowDialog() != true)
             {
@@ -99,7 +99,7 @@ internal class TsUnpack
                 }
             }
         }
-            
+
         foreach (TsFile tsFile in activity.Files.Where(tsFile => (!tsFile.Exists) || (tsFile.Exists && tsFile.Overwrite)))
         {
             try
@@ -110,7 +110,7 @@ internal class TsUnpack
                 {
                     Directory.CreateDirectory(dirPath);
                 }
-                using (StreamWriter streamWriter = new StreamWriter(path, false, Encoding.Unicode))
+                using (var streamWriter = new StreamWriter(path, false, Encoding.Unicode))
                 {
                     streamWriter.Write(tsFile.Content);
                 }
@@ -121,16 +121,16 @@ internal class TsUnpack
             }
         }
 
-        ResultWindow resultWindow = new ResultWindow();
+        var resultWindow = new ResultWindow();
         resultWindow.DataContext = activity;
         resultWindow.ShowDialog();
     }
 
-    private Activity ReadActivityFromBytes(byte[] bytes)
+    private static Activity ReadActivityFromBytes(byte[] bytes)
     {
-        Activity activity = new Activity();
-        ByteReader byteReader = new ByteReader(bytes);
-        StringBuilder stringBuiler = new StringBuilder();
+        var activity = new Activity();
+        var byteReader = new ByteReader(bytes);
+        var stringBuiler = new StringBuilder();
 
         stringBuiler.Clear();
         uint routeNameLength = byteReader.ReadUInt();
@@ -177,7 +177,7 @@ internal class TsUnpack
         }
         for (int i = 0; i < filesCount; i++)
         {
-            TsFile activityFile = new TsFile();
+            var activityFile = new TsFile();
             stringBuiler.Clear();
             uint contentLength = byteReader.ReadUInt() / 2;
             uint pathLength = byteReader.ReadUInt();
@@ -211,18 +211,18 @@ internal class TsUnpack
         return activity;
     }
 
-    private string GetUnpackingPath()
+    private static string GetUnpackingPath()
     {
-        string mstsPath = (string) Registry.GetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", null);
-        if(mstsPath == null)
+        string mstsPath = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", null);
+        if (mstsPath == null)
         {
             if (Environment.Is64BitOperatingSystem)
             {
-                mstsPath = (string) Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
+                mstsPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
             }
             else
             {
-                mstsPath = (string) Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
+                mstsPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
             }
         }
         if (mstsPath == null)
@@ -232,13 +232,13 @@ internal class TsUnpack
         return mstsPath;
     }
 
-    private string GetRouteId(string mstsPath, string routeDirectory)
+    private static string GetRouteId(string mstsPath, string routeDirectory)
     {
         try
         {
             string routeId = null;
-            FileInfo trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
-            using (TokenReader tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
+            var trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
+            using (var tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
             {
                 string token;
                 while ((token = tokenReader.ReadToken()) != null)
@@ -258,13 +258,13 @@ internal class TsUnpack
         }
     }
 
-    private uint GetSerial(string mstsPath, string routeDirectory)
+    private static uint GetSerial(string mstsPath, string routeDirectory)
     {
         try
         {
             string fileName = null;
-            FileInfo trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
-            using (TokenReader tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
+            var trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
+            using (var tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
             {
                 string token;
                 while ((token = tokenReader.ReadToken()) != null)
@@ -278,8 +278,8 @@ internal class TsUnpack
             }
 
             uint serial = 0;
-            FileInfo tdbInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, fileName + ".tdb"));
-            using (TokenReader tokenReader = new TokenReader(tdbInfo.OpenRead(), Encoding.Unicode))
+            var tdbInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, fileName + ".tdb"));
+            using (var tokenReader = new TokenReader(tdbInfo.OpenRead(), Encoding.Unicode))
             {
                 string token;
                 while ((token = tokenReader.ReadToken()) != null)

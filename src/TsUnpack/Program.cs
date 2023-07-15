@@ -15,12 +15,12 @@ public class Program
         {
             if (args.Length == 0)
             {
-                ConfigWindow configWindow = new ConfigWindow();
+                var configWindow = new ConfigWindow();
                 configWindow.ShowDialog();
             }
             else
             {
-                TsUnpack tsUnpack = new TsUnpack(new FileInfo(args[0]));
+                var tsUnpack = new TsUnpack(new FileInfo(args[0]));
                 tsUnpack.Unpack();
             }
         }

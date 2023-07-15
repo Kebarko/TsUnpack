@@ -17,7 +17,7 @@ internal partial class ConfigWindow : Window
         if (value != null)
         {
             CustomPathRadioButton.IsChecked = true;
-            CustomPathTextBox.Text = (string) value;
+            CustomPathTextBox.Text = (string)value;
         }
         else
         {
@@ -43,7 +43,7 @@ internal partial class ConfigWindow : Window
 
     private void CustomPathButtonClick(object sender, RoutedEventArgs e)
     {
-        FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+        var folderBrowserDialog = new FolderBrowserDialog();
         DialogResult dialogResult = folderBrowserDialog.ShowDialog();
         if (dialogResult == System.Windows.Forms.DialogResult.OK)
         {

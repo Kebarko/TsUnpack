@@ -18,7 +18,7 @@ internal class Activity : INotifyPropertyChanged
         get
         {
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(Files);
-            PropertyGroupDescription groupDescription = new PropertyGroupDescription("UnpackingResult");
+            var groupDescription = new PropertyGroupDescription("UnpackingResult");
             view.GroupDescriptions.Add(groupDescription);
             return view;
         }
@@ -37,7 +37,7 @@ internal class Activity : INotifyPropertyChanged
             {
                 return true;
             }
-            if (ExistingFiles.Count(f => f.Overwrite) == 0)
+            if (!ExistingFiles.Any(f => f.Overwrite))
             {
                 return false;
             }
@@ -49,9 +49,9 @@ internal class Activity : INotifyPropertyChanged
             {
                 foreach (TsFile tsFile in ExistingFiles)
                 {
-                    tsFile.Overwrite = (bool) value;
+                    tsFile.Overwrite = (bool)value;
                 }
-                OnPropertyChanged("ExistingFiles");
+                OnPropertyChanged(nameof(ExistingFiles));
             }
         }
     }
@@ -65,8 +65,6 @@ internal class Activity : INotifyPropertyChanged
 
     public void OnPropertyChanged(string propertyName = null)
     {
-        PropertyChangedEventHandler handler = PropertyChanged;
-        if (handler != null)
-            handler(this, new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
