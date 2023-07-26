@@ -3,20 +3,20 @@
 internal class TsFile
 {
     public string Path { get; set; }
-        
+
     public string Content { get; set; }
-        
+
     public bool Exists { get; set; }
-        
+
     public bool Overwrite { get; set; }
-        
+
     public bool Failed { get; set; }
-        
+
     public string FileName
     {
         get { return System.IO.Path.GetFileName(Path ?? string.Empty); }
     }
-        
+
     public UnpackingResultType UnpackingResult
     {
         get

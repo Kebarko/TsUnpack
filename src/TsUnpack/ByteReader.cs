@@ -15,7 +15,7 @@ internal class ByteReader
 
     public uint ReadUInt()
     {
-        uint result =  (uint) ((_bytes[_position + 3] << 24) |
+        uint result = (uint)((_bytes[_position + 3] << 24) |
                                (_bytes[_position + 2] << 16) |
                                (_bytes[_position + 1] << 8) |
                                (_bytes[_position]));

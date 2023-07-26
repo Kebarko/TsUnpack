@@ -11,7 +11,7 @@ internal partial class ResultWindow : Window
     {
         InitializeComponent();
     }
-        
+
     private void OkButton_OnClick(object sender, RoutedEventArgs e)
     {
         Close();
