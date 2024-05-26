@@ -6,7 +6,7 @@
         <UseWPF>true</UseWPF>
         <UseWindowsForms>True</UseWindowsForms>
         <RootNamespace>KE.MSTS.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-        <ApplicationIcon>icon.ico</ApplicationIcon>
+        <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
         <AssemblyVersion>1.1.*</AssemblyVersion>
     </PropertyGroup>
 
@@ -23,7 +23,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Content Include="icon.ico" />
+        <Content Include="Resources\icon.ico" />
     </ItemGroup>
 
 </Project>
