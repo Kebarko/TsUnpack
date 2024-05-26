@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace KE.MSTS.TsUnpack;
+namespace KE.MSTS.TsUnpack.Views;
 
 /// <summary>
 /// Interaction logic for OverwriteWindow.xaml

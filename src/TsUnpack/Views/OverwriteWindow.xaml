@@ -1,4 +1,4 @@
-﻿<Window x:Class="KE.MSTS.TsUnpack.OverwriteWindow"
+﻿<Window x:Class="KE.MSTS.TsUnpack.Views.OverwriteWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:tsUnpack="clr-namespace:KE.MSTS.TsUnpack"

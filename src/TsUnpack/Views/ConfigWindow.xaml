@@ -1,4 +1,4 @@
-﻿<Window x:Class="KE.MSTS.TsUnpack.ConfigWindow"
+﻿<Window x:Class="KE.MSTS.TsUnpack.Views.ConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="TsUnpack - Configuration" Height="192" Width="512" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"

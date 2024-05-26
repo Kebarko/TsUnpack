@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Forms;
 
-namespace KE.MSTS.TsUnpack;
+namespace KE.MSTS.TsUnpack.Views;
 
 /// <summary>
 /// Interaction logic for ConfigWindow.xaml
