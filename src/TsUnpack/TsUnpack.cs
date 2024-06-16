@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using TK.MSTS.Tokens;
 
 namespace KE.MSTS.TsUnpack;
 
@@ -237,21 +238,9 @@ internal class TsUnpack
     {
         try
         {
-            string routeId = null;
-            var trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
-            using (var tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
-            {
-                string token;
-                while ((token = tokenReader.ReadToken()) != null)
-                {
-                    if (token.Equals("RouteID", StringComparison.OrdinalIgnoreCase))
-                    {
-                        tokenReader.ReadToken();
-                        routeId = tokenReader.ReadTokenWithoutQuotes();
-                    }
-                }
-            }
-            return routeId;
+            TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
+
+            return trk.GetByName("Tr_RouteFile").GetByName("RouteID").Val.ToString().Trim('\"');
         }
         catch (Exception)
         {
@@ -263,36 +252,13 @@ internal class TsUnpack
     {
         try
         {
-            string fileName = null;
-            var trkInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
-            using (var tokenReader = new TokenReader(trkInfo.OpenRead(), Encoding.Unicode))
-            {
-                string token;
-                while ((token = tokenReader.ReadToken()) != null)
-                {
-                    if (token.Equals("Filename", StringComparison.OrdinalIgnoreCase))
-                    {
-                        tokenReader.ReadToken();
-                        fileName = tokenReader.ReadTokenWithoutQuotes();
-                    }
-                }
-            }
+            TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
 
-            uint serial = 0;
-            var tdbInfo = new FileInfo(Path.Combine(mstsPath, "ROUTES", routeDirectory, fileName + ".tdb"));
-            using (var tokenReader = new TokenReader(tdbInfo.OpenRead(), Encoding.Unicode))
-            {
-                string token;
-                while ((token = tokenReader.ReadToken()) != null)
-                {
-                    if (token.Equals("Serial", StringComparison.OrdinalIgnoreCase))
-                    {
-                        tokenReader.ReadToken();
-                        serial = uint.Parse(tokenReader.ReadToken());
-                    }
-                }
-            }
-            return serial;
+            string fileName = trk.GetByName("Tr_RouteFile").GetByName("FileName").Val.ToString().Trim('\"');
+
+            TokenFile tdb = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, fileName + ".tdb"));
+
+            return uint.Parse(tdb.GetByName("TrackDB").GetByName("Serial").Val.ToString());
         }
         catch (Exception)
         {
