@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System.Windows;
-using System.Windows.Forms;
 
 namespace KE.MSTS.TsUnpack.Views;
 
@@ -43,12 +42,15 @@ internal partial class ConfigWindow : Window
 
     private void CustomPathButtonClick(object sender, RoutedEventArgs e)
     {
-        var folderBrowserDialog = new FolderBrowserDialog();
-        DialogResult dialogResult = folderBrowserDialog.ShowDialog();
-        if (dialogResult == System.Windows.Forms.DialogResult.OK)
+        var openFolderDialog = new OpenFolderDialog
         {
-            Registry.SetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", folderBrowserDialog.SelectedPath, RegistryValueKind.String);
-            CustomPathTextBox.Text = folderBrowserDialog.SelectedPath;
+            Multiselect = false
+        };
+
+        if (openFolderDialog.ShowDialog() == true)
+        {
+            Registry.SetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", openFolderDialog.FolderName, RegistryValueKind.String);
+            CustomPathTextBox.Text = openFolderDialog.FolderName;
         }
     }
 

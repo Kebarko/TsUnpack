@@ -4,7 +4,6 @@
         <OutputType>WinExe</OutputType>
         <TargetFramework>net8.0-windows</TargetFramework>
         <UseWPF>true</UseWPF>
-        <UseWindowsForms>True</UseWindowsForms>
         <RootNamespace>KE.MSTS.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
         <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
         <AssemblyVersion>1.1.*</AssemblyVersion>
