@@ -12,16 +12,16 @@ namespace KE.MSTS.TsUnpack;
 
 internal class TsUnpack
 {
-    private readonly FileInfo _apkFile;
+    private readonly FileInfo apkFile;
 
     public TsUnpack(FileInfo apkFile)
     {
-        _apkFile = apkFile;
+        this.apkFile = apkFile;
     }
 
     public void Unpack()
     {
-        if (!_apkFile.Exists)
+        if (!apkFile.Exists)
         {
             throw new FileNotFoundException("Failed to open package!");
         }
@@ -29,7 +29,7 @@ internal class TsUnpack
         var decompressedMemoryStream = new MemoryStream();
 
         // APK file decompression
-        using (FileStream apkFileStream = _apkFile.OpenRead())
+        using (FileStream apkFileStream = apkFile.OpenRead())
         {
             using (var decompressionStream = new GZipStream(apkFileStream, CompressionMode.Decompress))
             {

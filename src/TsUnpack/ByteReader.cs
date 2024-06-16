@@ -2,32 +2,32 @@
 
 internal class ByteReader
 {
-    private readonly byte[] _bytes;
-    private int _position;
+    private readonly byte[] bytes;
+    private int position;
 
-    public bool End { get { return _position == _bytes.Length; } }
+    public bool End { get { return position == bytes.Length; } }
 
     public ByteReader(byte[] bytes)
     {
-        _bytes = bytes;
-        _position = 0;
+        this.bytes = bytes;
+        position = 0;
     }
 
     public uint ReadUInt()
     {
-        uint result = (uint)((_bytes[_position + 3] << 24) |
-                               (_bytes[_position + 2] << 16) |
-                               (_bytes[_position + 1] << 8) |
-                               (_bytes[_position]));
-        _position += 4;
+        uint result = (uint)((bytes[position + 3] << 24) |
+                               (bytes[position + 2] << 16) |
+                               (bytes[position + 1] << 8) |
+                               (bytes[position]));
+        position += 4;
         return result;
     }
 
     public char ReadChar()
     {
-        char result = (char)((_bytes[_position + 1] << 8) |
-                             (_bytes[_position]));
-        _position += 2;
+        char result = (char)((bytes[position + 1] << 8) |
+                             (bytes[position]));
+        position += 2;
         return result;
     }
 }
