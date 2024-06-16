@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.IO;
 using System.Windows;
 
 namespace KE.MSTS.TsUnpack.Views;
@@ -12,11 +13,11 @@ internal partial class ConfigWindow : Window
     {
         InitializeComponent();
 
-        object value = Registry.GetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", null);
-        if (value != null)
+        string? customPath = Utils.GetCustomPath();
+        if (customPath != null)
         {
             CustomPathRadioButton.IsChecked = true;
-            CustomPathTextBox.Text = (string)value;
+            CustomPathTextBox.Text = customPath;
         }
         else
         {
@@ -28,7 +29,6 @@ internal partial class ConfigWindow : Window
 
     private void DefaultPathRadioButtonChecked(object sender, RoutedEventArgs e)
     {
-        Registry.CurrentUser.DeleteSubKeyTree("Software\\TsUnpack", false);
         CustomPathButton.IsEnabled = false;
         CustomPathTextBox.Text = null;
         CustomPathTextBox.IsEnabled = false;
@@ -49,13 +49,21 @@ internal partial class ConfigWindow : Window
 
         if (openFolderDialog.ShowDialog() == true)
         {
-            Registry.SetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", openFolderDialog.FolderName, RegistryValueKind.String);
             CustomPathTextBox.Text = openFolderDialog.FolderName;
         }
     }
 
     private void OkButtonClick(object sender, RoutedEventArgs e)
     {
+        if (Path.Exists(CustomPathTextBox.Text))
+        {
+            Utils.SetCustomPath(CustomPathTextBox.Text);
+        }
+        else
+        {
+            Utils.SetCustomPath(null);
+        }
+
         Close();
     }
 }

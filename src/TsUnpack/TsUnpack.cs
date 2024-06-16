@@ -1,5 +1,4 @@
 ﻿using KE.MSTS.TsUnpack.Views;
-using Microsoft.Win32;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -63,7 +62,7 @@ internal class TsUnpack
         Activity activity = ReadActivityFromBytes(decompressedMemoryStream.ToArray());
         decompressedMemoryStream.Close();
 
-        string mstsPath = GetUnpackingPath();
+        string mstsPath = Utils.GetCustomPath() ?? Utils.GetDefaultPath();
         string routeId = GetRouteId(mstsPath, activity.RouteDirectory);
         if (!Directory.Exists(Path.Combine(mstsPath, "ROUTES", activity.RouteDirectory)) || routeId != activity.RouteId)
         {
@@ -211,27 +210,6 @@ internal class TsUnpack
         }
 
         return activity;
-    }
-
-    private static string GetUnpackingPath()
-    {
-        string mstsPath = (string)Registry.GetValue("HKEY_CURRENT_USER\\Software\\TsUnpack", "Path", null);
-        if (mstsPath == null)
-        {
-            if (Environment.Is64BitOperatingSystem)
-            {
-                mstsPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
-            }
-            else
-            {
-                mstsPath = (string)Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft Games\\Train Simulator\\1.0", "Path", null);
-            }
-        }
-        if (mstsPath == null)
-        {
-            throw new IOException("Microsoft Train Simulator installation not found!");
-        }
-        return mstsPath;
     }
 
     private static string GetRouteId(string mstsPath, string routeDirectory)
