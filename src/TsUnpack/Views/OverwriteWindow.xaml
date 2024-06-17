@@ -4,9 +4,6 @@
         xmlns:tsUnpack="clr-namespace:KE.MSTS.TsUnpack"
         Title="Overwrite?" Height="288" Width="352" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         x:ClassModifier="internal">
-    <Window.DataContext>
-        <tsUnpack:Activity />
-    </Window.DataContext>
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>

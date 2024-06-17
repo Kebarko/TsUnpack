@@ -13,7 +13,7 @@ internal partial class ConfigWindow : Window
     {
         InitializeComponent();
 
-        string? customPath = Utils.GetCustomPath();
+        string? customPath = RegUtils.GetCustomPath();
         if (customPath != null)
         {
             CustomPathRadioButton.IsChecked = true;
@@ -57,11 +57,11 @@ internal partial class ConfigWindow : Window
     {
         if (Path.Exists(CustomPathTextBox.Text))
         {
-            Utils.SetCustomPath(CustomPathTextBox.Text);
+            RegUtils.SetCustomPath(CustomPathTextBox.Text);
         }
         else
         {
-            Utils.SetCustomPath(null);
+            RegUtils.SetCustomPath(null);
         }
 
         Close();

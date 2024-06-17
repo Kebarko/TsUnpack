@@ -5,10 +5,20 @@ using System.Windows;
 
 namespace KE.MSTS.TsUnpack;
 
+/// <summary>
+/// Entry point for the Train Simulator activity unpacker application.
+/// </summary>
 public class Program
 {
-    internal const string Title = "Train Simulator activity unpackager";
+    /// <summary>
+    /// The title of the application.
+    /// </summary>
+    internal const string Title = "Train Simulator activity unpacker";
 
+    /// <summary>
+    /// Main method which serves as the entry point of the application.
+    /// </summary>
+    /// <param name="args">Command-line arguments passed to the application.</param>
     [STAThread]
     public static void Main(string[] args)
     {
@@ -16,18 +26,21 @@ public class Program
         {
             if (args.Length == 0)
             {
-                var configWindow = new ConfigWindow();
+                // If no command-line arguments are provided, show the configuration window.
+                ConfigWindow configWindow = new();
                 configWindow.ShowDialog();
             }
             else
             {
-                var tsUnpack = new TsUnpack(new FileInfo(args[0]));
+                // If a command-line argument is provided, treat it as a file path to unpack.
+                TsUnpack tsUnpack = new(new FileInfo(args[0]));
                 tsUnpack.Unpack();
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
+            // Display any exceptions in a message box to the user.
+            MessageBox.Show(ex.InnerException?.Message ?? ex.Message, Title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

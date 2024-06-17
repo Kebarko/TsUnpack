@@ -20,6 +20,6 @@ internal partial class OverwriteWindow : Window
 
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
-        ((Activity)DataContext).OnPropertyChanged("AllOverwrite");
+        ((Activity)DataContext).OnPropertyChanged(nameof(Activity.AllOverwrite));
     }
 }

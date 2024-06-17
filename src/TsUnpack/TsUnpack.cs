@@ -9,199 +9,206 @@ using TK.MSTS.Tokens;
 
 namespace KE.MSTS.TsUnpack;
 
-internal class TsUnpack
+internal class TsUnpack(FileInfo apkFile)
 {
-    private readonly FileInfo apkFile;
-
-    public TsUnpack(FileInfo apkFile)
-    {
-        this.apkFile = apkFile;
-    }
-
     public void Unpack()
     {
-        if (!apkFile.Exists)
+        Activity activity;
+
+        // Unzip APK file and read activity
+        using (FileStream fs = apkFile.OpenRead())
+        using (GZipStream gZip = new(fs, CompressionMode.Decompress, false))
+        using (MemoryStream ms = new())
         {
-            throw new FileNotFoundException("Failed to open package!");
+            gZip.CopyTo(ms);
+            activity = ReadActivityFromBytes(ms.ToArray());
         }
 
-        var decompressedMemoryStream = new MemoryStream();
-
-        // APK file decompression
-        using (FileStream apkFileStream = apkFile.OpenRead())
+        // Get the Train Simulator's root path and check that it exists
+        string? mstsPath = RegUtils.GetCustomPath() ?? RegUtils.GetDefaultPath();
+        if (mstsPath == null)
         {
-            using (var decompressionStream = new GZipStream(apkFileStream, CompressionMode.Decompress))
-            {
-                decompressionStream.CopyTo(decompressedMemoryStream);
-            }
+            throw new DirectoryNotFoundException("Undefined Train Simulator's root path!");
         }
-#if DEBUG
-        // Auxiliary output
-        using (var streamReader = new StreamReader(decompressedMemoryStream, Encoding.Unicode))
+        if (!Directory.Exists(mstsPath))
         {
-            using (var streamWriter = new StreamWriter("outchars.txt", false, Encoding.Unicode))
-            {
-                int character;
-                while ((character = streamReader.Read()) != -1)
-                {
-                    streamWriter.WriteLine("0x{0} {1,5} {2}", character.ToString("X4"), character, (char)character);
-                }
-            }
+            throw new DirectoryNotFoundException($"{mstsPath}{Environment.NewLine}The specified path does not exist!");
         }
 
-        // Auxiliary output
-        using (var streamWriter = new StreamWriter("outbytes.txt", false, Encoding.Unicode))
-        {
-            foreach (byte @byte in decompressedMemoryStream.ToArray())
-            {
-                streamWriter.WriteLine("0x{0} {1,3}", @byte.ToString("X2"), @byte);
-            }
-        }
-#endif
-
-        Activity activity = ReadActivityFromBytes(decompressedMemoryStream.ToArray());
-        decompressedMemoryStream.Close();
-
-        string mstsPath = Utils.GetCustomPath() ?? Utils.GetDefaultPath();
-        string routeId = GetRouteId(mstsPath, activity.RouteDirectory);
+        // Get the route ID and check that it matches the activity ID
+        string? routeId = GetRouteId(mstsPath, activity.RouteDirectory);
         if (!Directory.Exists(Path.Combine(mstsPath, "ROUTES", activity.RouteDirectory)) || routeId != activity.RouteId)
         {
-            throw new DirectoryNotFoundException(string.Format("This package requires a route called {0}, UID {1}!", activity.RouteName, activity.RouteId));
+            throw new DirectoryNotFoundException(string.Format("This package requires a route named {0}, UID {1}!", activity.RouteName, activity.RouteId));
         }
-        MessageBoxResult result = MessageBox.Show(string.Format("Unpackage new activity in route {0}?", activity.RouteName), Program.Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        // Ask for unpacking
+        MessageBoxResult result = MessageBox.Show(string.Format("Unpack new activity in route {0}?", activity.RouteName), Program.Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result == MessageBoxResult.No)
         {
             return;
         }
-        uint serial = GetSerial(mstsPath, activity.RouteDirectory);
+
+        // Get the route serial number and check that it matches the activity serial number
+        uint? serial = GetSerial(mstsPath, activity.RouteDirectory);
         if (serial != activity.Serial)
         {
+            // Ask for unpacking
             result = MessageBox.Show(string.Format("The installed track database for this route is version {0}, the activity was built on version {1}. Continue?", serial, activity.Serial), Program.Title, MessageBoxButton.YesNo, MessageBoxImage.Warning);
             if (result == MessageBoxResult.No)
             {
                 return;
             }
         }
+
+        // Iterate over each file that already exists
         foreach (TsFile tsFile in activity.Files.Where(tsFile => File.Exists(Path.Combine(mstsPath, tsFile.Path))))
         {
-            tsFile.Exists = true;
+            // Set initial state to existing
+            tsFile.InitialState = TsFileInitialState.Existing;
+
+            // Set overwrite flag to true by default
             tsFile.Overwrite = true;
         }
 
-        if (activity.Files.Any(f => f.Exists))
+        if (activity.Files.Any(f => f.InitialState == TsFileInitialState.Existing))
         {
-            var overwriteWindow = new OverwriteWindow();
-            overwriteWindow.DataContext = activity;
+            // If there are existing files, let user decide which ones to overwrite
+            OverwriteWindow overwriteWindow = new()
+            {
+                DataContext = activity
+            };
+
             if (overwriteWindow.ShowDialog() != true)
             {
-                foreach (TsFile tsFile in activity.Files)
+                // If dialog is cancelled, no file will be overwritten
+                foreach (TsFile tsFile in activity.ExistingFiles)
                 {
                     tsFile.Overwrite = false;
                 }
             }
         }
 
-        foreach (TsFile tsFile in activity.Files.Where(tsFile => (!tsFile.Exists) || (tsFile.Exists && tsFile.Overwrite)))
+        // Iterate over each file
+        foreach (TsFile tsFile in activity.Files)
         {
             try
             {
-                string path = Path.Combine(mstsPath, tsFile.Path);
-                string dirPath = Path.GetDirectoryName(path);
-                if (!Directory.Exists(dirPath))
+                if (tsFile.InitialState == TsFileInitialState.New || tsFile.Overwrite)
                 {
-                    Directory.CreateDirectory(dirPath);
+                    string path = Path.Combine(mstsPath, tsFile.Path);
+                    string? dirPath = Path.GetDirectoryName(path);
+                    if (dirPath != null && !Directory.Exists(dirPath))
+                    {
+                        Directory.CreateDirectory(dirPath);
+                    }
+
+                    using (var streamWriter = new StreamWriter(path, false, Encoding.Unicode))
+                    {
+                        streamWriter.Write(tsFile.Content);
+                    }
+
+                    tsFile.ResultingState = tsFile.Overwrite ? TsFileResultingState.Overwritten : TsFileResultingState.Created;
                 }
-                using (var streamWriter = new StreamWriter(path, false, Encoding.Unicode))
+                else
                 {
-                    streamWriter.Write(tsFile.Content);
+                    tsFile.ResultingState = TsFileResultingState.Skipped;
                 }
             }
-            catch (Exception)
+            catch
             {
-                tsFile.Failed = true;
+                tsFile.ResultingState = TsFileResultingState.Failed;
             }
         }
 
-        var resultWindow = new ResultWindow();
-        resultWindow.DataContext = activity;
+        // Show the result
+        ResultWindow resultWindow = new()
+        {
+            DataContext = activity
+        };
+
         resultWindow.ShowDialog();
     }
 
+    /// <summary>
+    /// Reads entire activity from byte array.
+    /// </summary>
     private static Activity ReadActivityFromBytes(byte[] bytes)
     {
-        var activity = new Activity();
         var byteReader = new ByteReader(bytes);
-        var stringBuiler = new StringBuilder();
 
-        stringBuiler.Clear();
         uint routeNameLength = byteReader.ReadUInt();
+
+        StringBuilder routeNameBuilder = new();
         for (uint i = 0; i < routeNameLength; i++)
         {
             char c = byteReader.ReadChar();
             if (c != '\0')
             {
-                stringBuiler.Append(c);
+                routeNameBuilder.Append(c);
             }
         }
-        activity.RouteName = stringBuiler.ToString();
 
-        stringBuiler.Clear();
         uint routeDirectoryLength = byteReader.ReadUInt();
+
+        StringBuilder routeDirectoryBuilder = new();
         for (uint i = 0; i < routeDirectoryLength; i++)
         {
             char c = byteReader.ReadChar();
             if (c != '\0')
             {
-                stringBuiler.Append(c);
+                routeDirectoryBuilder.Append(c);
             }
         }
-        activity.RouteDirectory = stringBuiler.ToString();
 
-        stringBuiler.Clear();
         uint routeIdLength = byteReader.ReadUInt();
+
+        StringBuilder routeIdBuilder = new();
         for (uint i = 0; i < routeIdLength; i++)
         {
             char c = byteReader.ReadChar();
             if (c != '\0')
             {
-                stringBuiler.Append(c);
+                routeIdBuilder.Append(c);
             }
         }
-        activity.RouteId = stringBuiler.ToString();
 
-        activity.Serial = byteReader.ReadUInt();
+        uint serial = byteReader.ReadUInt();
 
         uint filesCount = byteReader.ReadUInt();
         if (filesCount == 0)
         {
             throw new InvalidDataException("There are no files in this package!");
         }
+
+        Activity activity = new(routeNameBuilder.ToString(), routeDirectoryBuilder.ToString(), routeIdBuilder.ToString(), serial);
+
         for (int i = 0; i < filesCount; i++)
         {
-            var activityFile = new TsFile();
-            stringBuiler.Clear();
             uint contentLength = byteReader.ReadUInt() / 2;
             uint pathLength = byteReader.ReadUInt();
+
+            StringBuilder pathBuilder = new();
             for (int j = 0; j < pathLength; j++)
             {
                 char c = byteReader.ReadChar();
                 if (c != '\0')
                 {
-                    stringBuiler.Append(c);
+                    pathBuilder.Append(c);
                 }
             }
-            activityFile.Path = stringBuiler.ToString();
-            stringBuiler.Clear();
+
+            StringBuilder contentBuilder = new();
             for (int j = 0; j < contentLength; j++)
             {
                 char c = byteReader.ReadChar();
                 if (c != '\0' && c != '\xFEFF')
                 {
-                    stringBuiler.Append(c);
+                    contentBuilder.Append(c);
                 }
             }
-            activityFile.Content = stringBuiler.ToString();
-            activity.Files.Add(activityFile);
+
+            activity.Files.Add(new TsFile(pathBuilder.ToString(), contentBuilder.ToString()));
         }
 
         if (!byteReader.End)
@@ -212,35 +219,35 @@ internal class TsUnpack
         return activity;
     }
 
-    private static string GetRouteId(string mstsPath, string routeDirectory)
+    /// <summary>
+    /// Gets the route id .trk file.
+    /// </summary>
+    private static string? GetRouteId(string mstsPath, string routeDirectory)
     {
-        try
-        {
-            TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
+        TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
 
-            return trk.GetByName("Tr_RouteFile").GetByName("RouteID").Val.ToString().Trim('\"');
-        }
-        catch (Exception)
-        {
-            throw new InvalidDataException("Failed to read route info!");
-        }
+        return trk.GetByName("Tr_RouteFile")?.GetByName("RouteID")?.Val.ToString()?.Trim('\"');
     }
 
-    private static uint GetSerial(string mstsPath, string routeDirectory)
+    /// <summary>
+    /// Gets the route serial number from .tdb file.
+    /// </summary>
+    private static uint? GetSerial(string mstsPath, string routeDirectory)
     {
-        try
+        TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
+
+        string? fileName = trk.GetByName("Tr_RouteFile")?.GetByName("FileName")?.Val.ToString()?.Trim('\"');
+        if (fileName != null)
         {
-            TokenFile trk = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"));
-
-            string fileName = trk.GetByName("Tr_RouteFile").GetByName("FileName").Val.ToString().Trim('\"');
-
             TokenFile tdb = TokenFile.ReadFile(Path.Combine(mstsPath, "ROUTES", routeDirectory, fileName + ".tdb"));
 
-            return uint.Parse(tdb.GetByName("TrackDB").GetByName("Serial").Val.ToString());
+            string? serial = tdb.GetByName("TrackDB")?.GetByName("Serial")?.Val.ToString();
+            if (serial != null)
+            {
+                return uint.Parse(serial);
+            }
         }
-        catch (Exception)
-        {
-            throw new InvalidDataException("Failed to read route info!");
-        }
+
+        return null;
     }
 }
