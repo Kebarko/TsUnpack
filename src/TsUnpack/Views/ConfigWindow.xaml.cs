@@ -13,17 +13,22 @@ internal partial class ConfigWindow : Window
     {
         InitializeComponent();
 
+        string? defaultPath = RegUtils.GetDefaultPath();
+        if (Path.Exists(defaultPath))
+        {
+            DefaultPathRadioButton.IsChecked = true;
+        }
+        else
+        {
+            DefaultPathRadioButton.IsEnabled = false;
+            CustomPathRadioButton.IsChecked = true;
+        }
+
         string? customPath = RegUtils.GetCustomPath();
         if (customPath != null)
         {
             CustomPathRadioButton.IsChecked = true;
             CustomPathTextBox.Text = customPath;
-        }
-        else
-        {
-            DefaultPathRadioButton.IsChecked = true;
-            CustomPathButton.IsEnabled = false;
-            CustomPathTextBox.IsEnabled = false;
         }
     }
 
