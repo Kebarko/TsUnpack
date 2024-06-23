@@ -1,8 +1,0 @@
-﻿{
-  "profiles": {
-    "TsUnpack": {
-      "commandName": "Project",
-      "commandLineArgs": "poi_ex520.apk"
-    }
-  }
-}
