@@ -6,7 +6,7 @@
         <UseWPF>true</UseWPF>
         <RootNamespace>KE.MSTS.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
         <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
-        <AssemblyVersion>1.1.*</AssemblyVersion>
+        <AssemblyVersion>1.2.*</AssemblyVersion>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
