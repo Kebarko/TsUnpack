@@ -17,7 +17,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding Overwrite, Mode=TwoWay}" Click="ButtonBase_OnClick" />
+                        <CheckBox IsChecked="{Binding Overwrite, Mode=TwoWay}" Click="CheckBox_OnClick" />
                         <TextBlock Text="{Binding FileName}" Margin="5, 0, 0, 0" />
                     </StackPanel>
                 </DataTemplate>

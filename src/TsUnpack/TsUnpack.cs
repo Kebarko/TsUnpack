@@ -9,8 +9,15 @@ using System.Windows;
 
 namespace KE.MSTS.TsUnpack;
 
+/// <summary>
+/// Represents a main class for unpacking and processing an activity.
+/// </summary>
 internal class TsUnpack(FileInfo apkFile)
 {
+    /// <summary>
+    /// Unpacks the APK file and processes the contained activity.
+    /// </summary>
+    /// <exception cref="DirectoryNotFoundException"></exception>
     public void Unpack()
     {
         Activity activity;
@@ -133,6 +140,8 @@ internal class TsUnpack(FileInfo apkFile)
     /// <summary>
     /// Reads entire activity from byte array.
     /// </summary>
+    /// <param name="bytes">The byte array to read the activity from.</param>
+    /// <returns>The <see cref="Activity"/> object read from the byte array.</returns>
     private static Activity ReadActivityFromBytes(byte[] bytes)
     {
         var byteReader = new ByteReader(bytes);
@@ -222,6 +231,9 @@ internal class TsUnpack(FileInfo apkFile)
     /// <summary>
     /// Gets the route id .trk file.
     /// </summary>
+    /// <param name="mstsPath">The Train Simulator's root path.</param>
+    /// <param name="routeDirectory">The route directory name.</param>
+    /// <returns>The route ID if found; otherwise, null.</returns>
     private static string? GetRouteId(string mstsPath, string routeDirectory)
     {
         return GetTokenValue(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"), "RouteID");
@@ -230,6 +242,9 @@ internal class TsUnpack(FileInfo apkFile)
     /// <summary>
     /// Gets the route serial number from .tdb file.
     /// </summary>
+    /// <param name="mstsPath">The Train Simulator's root path.</param>
+    /// <param name="routeDirectory">The route directory name.</param>
+    /// <returns>The route serial number if found; otherwise, null.</returns>
     private static uint? GetSerial(string mstsPath, string routeDirectory)
     {
         string? fileName = GetTokenValue(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"), "RouteID");
@@ -248,6 +263,9 @@ internal class TsUnpack(FileInfo apkFile)
     /// <summary>
     /// Gets the value of the first occurrence of the specified token.
     /// </summary>
+    /// <param name="path">The path of the file to read.</param>
+    /// <param name="token">The token to search for.</param>
+    /// <returns>The value of the token if found; otherwise, null.</returns>
     private static string? GetTokenValue(string path, string token)
     {
         using (StreamReader reader = new(path, true))
