@@ -26,10 +26,4 @@
         <Content Include="Resources\icon.ico" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Reference Include="TK.MSTS.Tokens">
-        <HintPath>..\..\lib\TK.MSTS.Tokens.dll</HintPath>
-      </Reference>
-    </ItemGroup>
-
 </Project>

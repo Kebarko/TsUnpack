@@ -4,8 +4,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
-using TK.MSTS.Tokens;
 
 namespace KE.MSTS.TsUnpack;
 
@@ -35,11 +35,8 @@ internal class TsUnpack(FileInfo apkFile)
             throw new DirectoryNotFoundException($"{mstsPath}{Environment.NewLine}The specified path does not exist!");
         }
 
-        // Parallel loading of .trk and .tdb files
-        SimisFileLoader simisFileLoader = new(mstsPath, activity.RouteDirectory);
-
         // Get the route ID and check that it matches the activity ID
-        string? routeId = GetRouteId(simisFileLoader);
+        string? routeId = GetRouteId(mstsPath, activity.RouteDirectory);
         if (!Directory.Exists(Path.Combine(mstsPath, "ROUTES", activity.RouteDirectory)) || routeId != activity.RouteId)
         {
             throw new DirectoryNotFoundException(string.Format("This package requires a route named {0}, UID {1}!", activity.RouteName, activity.RouteId));
@@ -53,7 +50,7 @@ internal class TsUnpack(FileInfo apkFile)
         }
 
         // Get the route serial number and check that it matches the activity serial number
-        uint? serial = GetSerial(simisFileLoader);
+        uint? serial = GetSerial(mstsPath, activity.RouteDirectory);
         if (serial != activity.Serial)
         {
             // Ask for unpacking
@@ -225,29 +222,43 @@ internal class TsUnpack(FileInfo apkFile)
     /// <summary>
     /// Gets the route id .trk file.
     /// </summary>
-    private static string? GetRouteId(SimisFileLoader simisFileLoader)
+    private static string? GetRouteId(string mstsPath, string routeDirectory)
     {
-        TokenFile? trk = simisFileLoader.GetTrkFile();
-
-        return trk?.GetByName("Tr_RouteFile")?.GetByName("RouteID")?.Val.ToString()?.Trim('\"');
+        return GetTokenValue(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"), "RouteID");
     }
 
     /// <summary>
     /// Gets the route serial number from .tdb file.
     /// </summary>
-    private static uint? GetSerial(SimisFileLoader simisFileLoader)
+    private static uint? GetSerial(string mstsPath, string routeDirectory)
     {
-        TokenFile? trk = simisFileLoader.GetTrkFile();
-
-        string? fileName = trk?.GetByName("Tr_RouteFile")?.GetByName("FileName")?.Val.ToString()?.Trim('\"');
+        string? fileName = GetTokenValue(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".trk"), "RouteID");
         if (fileName != null)
         {
-            TokenFile? tdb = simisFileLoader.GetTdbFile();
-
-            string? serial = tdb?.GetByName("TrackDB")?.GetByName("Serial")?.Val.ToString();
+            string? serial = GetTokenValue(Path.Combine(mstsPath, "ROUTES", routeDirectory, routeDirectory + ".tdb"), "Serial");
             if (serial != null)
             {
                 return uint.Parse(serial);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Gets the value of the first occurrence of the specified token.
+    /// </summary>
+    private static string? GetTokenValue(string path, string token)
+    {
+        using (StreamReader reader = new(path, true))
+        {
+            while (reader.ReadLine() is string line)
+            {
+                Match match = Regex.Match(line, $@"\s*{token}\s*\((.+)\)\s*");
+                if (match.Success)
+                {
+                    return match.Groups[1].Value.Trim().Trim('\"');
+                }
             }
         }
 
