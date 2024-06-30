@@ -33,6 +33,8 @@ to:
 
 `"C:\Program Files (x86)\Microsoft Games\Train Simulator\Utils\TSUnpack.exe" "%1"`.
 
+Train Simulator installation path may vary.
+
 ## Configuration
 
 Running the application without arguments will start it in configuration mode. In this mode, you can set the path for unpacking activities:
