@@ -32,7 +32,7 @@ internal class TsUnpack(FileInfo apkFile)
         }
 
         // Get the Train Simulator's root path and check that it exists
-        string? mstsPath = RegUtils.GetCustomPath() ?? RegUtils.GetDefaultPath();
+        string? mstsPath = RegUtils.GetFinalPath();
         if (mstsPath == null)
         {
             throw new DirectoryNotFoundException("Undefined Train Simulator's root path!");

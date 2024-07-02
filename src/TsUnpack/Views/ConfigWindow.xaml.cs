@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 
 namespace KE.MSTS.TsUnpack.Views;
@@ -9,61 +10,87 @@ namespace KE.MSTS.TsUnpack.Views;
 /// </summary>
 internal partial class ConfigWindow : Window
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ConfigWindow"/> class. Sets the state of radio buttons and text box based on the default and custom paths.
-    /// </summary>
     public ConfigWindow()
     {
         InitializeComponent();
+    }
 
-        string? defaultPath = RegUtils.GetDefaultPath();
-        if (Path.Exists(defaultPath))
+    private void ConfigWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        string? trainSimPath = RegUtils.GetTrainSimPath();
+        if (trainSimPath != null)
         {
-            DefaultPathRadioButton.IsChecked = true;
+            TrainSimPathRB.IsChecked = true;
+            TrainSimPathRB_Checked(this, new RoutedEventArgs());
         }
         else
         {
-            DefaultPathRadioButton.IsEnabled = false;
-            CustomPathRadioButton.IsChecked = true;
+            TrainSimPathRB.IsEnabled = false;
+        }
+
+        IList<string> openRailsProfiles = RegUtils.GetOpenRailsProfiles()
+            .SelectMany(kvp => kvp.Value.Select(profile => $"{kvp.Key}/{profile}"))
+            .ToList();
+
+        if (openRailsProfiles.Count > 0)
+        {
+            OpenRailsProfileCB.Items.Clear();
+            foreach (string profile in openRailsProfiles)
+            {
+                OpenRailsProfileCB.Items.Add(profile);
+            }
+
+            string? openRailsProfile = RegUtils.GetOpenRailsProfile();
+            if (openRailsProfile != null && openRailsProfiles.Contains(openRailsProfile))
+            {
+                OpenRailsProfileRB.IsChecked = true;
+                OpenRailsProfileRB_Checked(this, new RoutedEventArgs());
+                OpenRailsProfileCB.SelectedItem = openRailsProfile;
+            }
+        }
+        else
+        {
+            OpenRailsProfileRB.IsEnabled = false;
         }
 
         string? customPath = RegUtils.GetCustomPath();
         if (customPath != null)
         {
-            CustomPathRadioButton.IsChecked = true;
-            CustomPathTextBox.Text = customPath;
+            CustomPathTB.Text = customPath;
+            CustomPathRB.IsChecked = true;
+            CustomPathRB_Checked(this, new RoutedEventArgs());
         }
     }
 
-    /// <summary>
-    /// Handles the Checked event of the DefaultPathRadioButton control. Disables the custom path button and text box.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-    private void DefaultPathRadioButtonChecked(object sender, RoutedEventArgs e)
+    private void TrainSimPathRB_Checked(object sender, RoutedEventArgs e)
     {
-        CustomPathButton.IsEnabled = false;
-        CustomPathTextBox.Text = null;
-        CustomPathTextBox.IsEnabled = false;
+        OpenRailsProfileCB.SelectedItem = null;
+        OpenRailsProfileCB.IsEnabled = false;
+
+        CustomPathTB.Text = null;
+        CustomPathTB.IsEnabled = false;
+        CustomPathBtn.IsEnabled = false;
     }
 
-    /// <summary>
-    /// Handles the Checked event of the CustomPathRadioButton control. Enables the custom path button and text box.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-    private void CustomPathRadioButtonChecked(object sender, RoutedEventArgs e)
+    private void OpenRailsProfileRB_Checked(object sender, RoutedEventArgs e)
     {
-        CustomPathButton.IsEnabled = true;
-        CustomPathTextBox.IsEnabled = true;
+        OpenRailsProfileCB.IsEnabled = true;
+
+        CustomPathTB.Text = null;
+        CustomPathTB.IsEnabled = false;
+        CustomPathBtn.IsEnabled = false;
     }
 
-    /// <summary>
-    /// Handles the Click event of the CustomPathButton control. Opens a folder dialog to select a custom path.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-    private void CustomPathButtonClick(object sender, RoutedEventArgs e)
+    private void CustomPathRB_Checked(object sender, RoutedEventArgs e)
+    {
+        OpenRailsProfileCB.SelectedItem = null;
+        OpenRailsProfileCB.IsEnabled = false;
+
+        CustomPathTB.IsEnabled = true;
+        CustomPathBtn.IsEnabled = true;
+    }
+
+    private void CustomPathBtn_Click(object sender, RoutedEventArgs e)
     {
         var openFolderDialog = new OpenFolderDialog
         {
@@ -72,23 +99,30 @@ internal partial class ConfigWindow : Window
 
         if (openFolderDialog.ShowDialog() == true)
         {
-            CustomPathTextBox.Text = openFolderDialog.FolderName;
+            CustomPathTB.Text = openFolderDialog.FolderName;
         }
     }
 
-    /// <summary>
-    /// Handles the Click event of the OK button control. Sets the custom path in the registry if the path exists, otherwise clears the custom path.
-    /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="e">The <see cref="RoutedEventArgs"/> instance containing the event data.</param>
-    private void OkButtonClick(object sender, RoutedEventArgs e)
+    private void OkBtn_Click(object sender, RoutedEventArgs e)
     {
-        if (Path.Exists(CustomPathTextBox.Text))
+        if (TrainSimPathRB.IsChecked == true)
         {
-            RegUtils.SetCustomPath(CustomPathTextBox.Text);
+            RegUtils.SetOpenRailsProfile(null);
+            RegUtils.SetCustomPath(null);
+        }
+        else if (OpenRailsProfileRB.IsChecked == true)
+        {
+            RegUtils.SetOpenRailsProfile((string?)OpenRailsProfileCB.SelectedItem);
+            RegUtils.SetCustomPath(null);
+        }
+        else if (CustomPathRB.IsChecked == true)
+        {
+            RegUtils.SetOpenRailsProfile(null);
+            RegUtils.SetCustomPath(CustomPathTB.Text);
         }
         else
         {
+            RegUtils.SetOpenRailsProfile(null);
             RegUtils.SetCustomPath(null);
         }
 
