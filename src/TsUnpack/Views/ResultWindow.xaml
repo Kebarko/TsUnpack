@@ -2,17 +2,17 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
         xmlns:tsUnpack="clr-namespace:KE.MSTS.TsUnpack"
-        Title="Unpacking result" Height="288" Width="352" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Title="Unpacking result" Width="352" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         x:ClassModifier="internal">
-    <Grid Margin="10">
+    <Window.Resources>
+        <ResourceDictionary Source="../Resources/Styles.xaml" />
+    </Window.Resources>
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="25"/>
+            <RowDefinition Height="200" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <ListView Grid.Row="0" Grid.Column="0" Margin="0, 0, 0, 10" SelectionMode="Single" ItemsSource="{Binding Path=GroupedFiles}">
+        <ListView Grid.Row="0" SelectionMode="Single" ItemsSource="{Binding Path=GroupedFiles}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding FileName}" Margin="5, 0, 0, 0" />
@@ -43,6 +43,6 @@
                 </GroupStyle>
             </ListView.GroupStyle>
         </ListView>
-        <Button Grid.Row="1" Grid.Column="0" Margin="100, 0, 100, 0" IsDefault="True" Content="OK" Click="OkButton_OnClick" />
+        <Button Grid.Row="1" IsDefault="True" Content="OK" Click="OkButton_OnClick" />
     </Grid>
 </Window>

@@ -27,8 +27,7 @@ public class Program
             if (args.Length == 0)
             {
                 // If no command-line arguments are provided, show the configuration window.
-                ConfigWindow configWindow = new();
-                configWindow.ShowDialog();
+                new Application().Run(new ConfigWindow());
             }
             else
             {

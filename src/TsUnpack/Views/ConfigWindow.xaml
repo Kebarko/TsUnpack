@@ -1,8 +1,11 @@
 ﻿<Window x:Class="KE.MSTS.TsUnpack.Views.ConfigWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="TsUnpack - Configuration" Width="512" ResizeMode="NoResize" SizeToContent="Height" WindowStartupLocation="CenterScreen"
+        Title="TsUnpack - Configuration" Width="512" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
         Loaded="ConfigWindow_Loaded" x:ClassModifier="internal">
+    <Window.Resources>
+        <ResourceDictionary Source="../Resources/Styles.xaml" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
@@ -19,15 +22,15 @@
         
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Content="Unpacking path" />
 
-        <RadioButton Grid.Row="1" Grid.Column="0" Margin="30, 5, 5, 5" GroupName="PathGroup" x:Name="TrainSimPathRB" Content="Train Simulator" Checked="TrainSimPathRB_Checked" />
+        <RadioButton Grid.Row="1" Grid.Column="0" GroupName="PathGroup" x:Name="TrainSimPathRB" Content="Train Simulator" Checked="TrainSimPathRB_Checked" />
 
-        <RadioButton Grid.Row="2" Grid.Column="0" Margin="30, 5, 5, 5" GroupName="PathGroup" x:Name="OpenRailsProfileRB" Content="Open Rails profile" Checked="OpenRailsProfileRB_Checked" />
-        <ComboBox Grid.Row="2" Grid.Column="1" Margin="2" x:Name="OpenRailsProfileCB" />
+        <RadioButton Grid.Row="2" Grid.Column="0" GroupName="PathGroup" x:Name="OpenRailsProfileRB" Content="Open Rails profile" Checked="OpenRailsProfileRB_Checked" />
+        <ComboBox Grid.Row="2" Grid.Column="1" x:Name="OpenRailsProfileCB" />
 
-        <RadioButton Grid.Row="3" Grid.Column="0" Margin="30, 5, 5, 5"  GroupName="PathGroup" x:Name="CustomPathRB" Content="Custom path" Checked="CustomPathRB_Checked" />
-        <TextBox Grid.Row="3" Grid.Column="1" Margin="2" x:Name="CustomPathTB" IsReadOnly="True" />
-        <Button Grid.Row="3" Grid.Column="2" Width="25" Margin="2" x:Name="CustomPathBtn" Content="..." Click="CustomPathBtn_Click" />
+        <RadioButton Grid.Row="3" Grid.Column="0" GroupName="PathGroup" x:Name="CustomPathRB" Content="Custom path" Checked="CustomPathRB_Checked" />
+        <TextBox Grid.Row="3" Grid.Column="1" x:Name="CustomPathTB" IsReadOnly="True" />
+        <Button Grid.Row="3" Grid.Column="2" x:Name="CustomPathBtn" Content="..." Click="CustomPathBtn_Click" Style="{StaticResource SquareButton}"/>
 
-        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Width="50" Height="25" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="OkBtn" IsDefault="True" Content="OK" Click="OkBtn_Click"  />
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="OkBtn" IsDefault="True" Content="OK" Click="OkBtn_Click"  />
     </Grid>
 </Window>
