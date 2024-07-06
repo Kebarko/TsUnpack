@@ -44,13 +44,14 @@ internal class TsUnpack(FileInfo apkFile)
 
         // Get the route ID and check that it matches the activity ID
         string? routeId = GetRouteId(mstsPath, activity.RouteDirectory);
-        if (!Directory.Exists(Path.Combine(mstsPath, "ROUTES", activity.RouteDirectory)) || routeId != activity.RouteId)
+        string routePath = Path.Combine(mstsPath, "ROUTES", activity.RouteDirectory);
+        if (!Directory.Exists(routePath) || routeId != activity.RouteId)
         {
             throw new DirectoryNotFoundException(string.Format("This package requires a route named {0}, UID {1}!", activity.RouteName, activity.RouteId));
         }
 
         // Ask for unpacking
-        MessageBoxResult result = MessageBox.Show(string.Format("Unpack new activity in route {0}?", activity.RouteName), Program.Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
+        MessageBoxResult result = MessageBox.Show(string.Format("Unpack new activity in route {0}?", routePath), Program.Title, MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result == MessageBoxResult.No)
         {
             return;
