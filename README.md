@@ -7,6 +7,7 @@ Ts Unpack is a replacement application for the original Train Simulator tool use
 - You can choose the destination folder for unpacking.
 - You can select which existing files to overwrite.
 - It preserves the letter case of file names.
+- It shows the result of unpacking.
 
 ## Requirements
 
@@ -41,10 +42,11 @@ Running the application without arguments will start it in configuration mode. I
 
 ![Image](art/config.png)
 
-- **Default path**: The path where Train Simulator is installed.
+- **Train Simulator**: The path where Train Simulator is installed.
+- **Open Rails profile**: The Open Rails profile path.
 - **Custom path**: A user-defined path where you want to unpack activities.
 
-The custom path has a higher priority than the default path.
+If Train Simulator is not installed or Open Rails does not have a profile, the option is disabled.
 
 ## Usage
 
