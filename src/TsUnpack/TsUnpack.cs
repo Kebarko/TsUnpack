@@ -221,6 +221,8 @@ internal class TsUnpack(FileInfo apkFile)
             activity.Files.Add(new TsFile(pathBuilder.ToString(), contentBuilder.ToString()));
         }
 
+        activity.Files.Sort((x, y) => x.FileName.CompareTo(y.FileName));
+
         if (!byteReader.End)
         {
             throw new InvalidDataException("Package damaged!");

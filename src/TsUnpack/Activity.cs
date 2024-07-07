@@ -33,7 +33,7 @@ internal class Activity(string routeName, string routeDirectory, string routeId,
     /// <summary>
     /// Gets the list of associated files.
     /// </summary>
-    public IList<TsFile> Files { get; } = new List<TsFile>();
+    public List<TsFile> Files { get; } = new List<TsFile>();
 
     /// <summary>
     /// Gets a collection view of the files grouped by the unpacking result.
@@ -43,8 +43,8 @@ internal class Activity(string routeName, string routeDirectory, string routeId,
         get
         {
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(Files);
-            var groupDescription = new PropertyGroupDescription(nameof(TsFile.ResultingState));
-            view.GroupDescriptions.Add(groupDescription);
+            view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(TsFile.ResultingState)));
+            view.SortDescriptions.Add(new SortDescription(nameof(TsFile.ResultingState), ListSortDirection.Ascending));
             return view;
         }
     }
@@ -52,7 +52,7 @@ internal class Activity(string routeName, string routeDirectory, string routeId,
     /// <summary>
     /// Gets a list of files that already exist.
     /// </summary>
-    public IList<TsFile> ExistingFiles
+    public List<TsFile> ExistingFiles
     {
         get { return Files.Where(f => f.InitialState == TsFileInitialState.Existing).ToList(); }
     }
