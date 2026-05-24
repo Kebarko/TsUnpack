@@ -29,7 +29,7 @@ jobs:
       run: dotnet publish --configuration Release --no-restore
       
     - name: Upload TsUnpack Build Artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: TsUnpack
         path: src/TsUnpack/bin/Release/
