@@ -11,7 +11,7 @@ Ts Unpack is a replacement application for the original Train Simulator tool use
 
 ## Requirements
 
-`.NET 8`
+`.NET 10`
 
 ## Installation
 
